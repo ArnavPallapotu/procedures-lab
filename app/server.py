@@ -68,16 +68,28 @@ def item_endpoint(key):
         if not ok:
             return jsonify({"error":"not found"}), 404
         return jsonify({"result":"deleted"})
-    
-# Vulnerable endpoint: reflects name into HTML without escaping
+
+@app.route("/items", methods=["POST"])
+def items_post():
+    data = request.get_json(force=True, silent=True)
+    if not data or "key" not in data or "value" not in data:
+        return jsonify({"error": "expected JSON with 'key' and 'value'"}), 400
+    key = data["key"]
+    value = data["value"]
+    utils.create_item(key, value)
+    return jsonify({"result": "created", "key": key}), 201
+
 @app.route("/vulnerable_echo")
 def vulnerable_echo():
     name = request.args.get("name", "")
-    # WARNING: raw insertion - this is intentionally vulnerable for the exercise
-    html = f"<h2>Hello {name}</h2>"
-    return html, 200, {"Content-Type": "text/html; charset=utf-8"}
+    safe_name = escape(name)
+    html = f"<h2>Hello {safe_name}</h2>"
+    headers = {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": "default-src 'self'; script-src 'self'"
+    }
+    return html, 200, headers
 
-# "Safe" echo uses escaping
 @app.route("/safe_echo")
 def safe_echo():
     name = request.args.get("name", "")
