@@ -2,7 +2,7 @@
 
 Author: *ArnavPallapotu*
 
-## Security Report:
+## Security Report;
 - **What I sent:** `<script>alert(1)</script>` to `/vulnerable_echo`.  
 - **What happened:** Before the fix an alert textbox with "1" popped up. After the fix the script was escaped and no alert appeared.  
 - **Why vulnerable / Fix applied:** The endpoint reflected raw input into HTML (XSS). I escaped input with `markupsafe.escape(name)` and added a Content-Security-Policy header
